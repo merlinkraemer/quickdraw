@@ -1,6 +1,7 @@
 # quickdraw
 
-Harpoon-style tmux session switcher. Popup with persistent order, number-jump, reorder, and i3-style slot assignment.
+Harpoon-style tmux session switcher. 
+Popup with session reorder, number hotkeys and i3 like slot assignment.
 
 **Requires:** tmux >= 3.2, bash >= 5
 - macOS: `brew install bash` (system bash is 3.2)
@@ -28,15 +29,15 @@ Default trigger: `Option/Alt+e` (no prefix required)
 |-----|--------|
 | `↑` / `↓` | Move cursor |
 | `Enter` | Switch to session |
-| `1`–`9`, `0` | Jump to session N |
+| `Number` | Jump to session N |
 | `Shift+↑/↓` or `Opt/Alt+↑/↓` | Reorder session |
-| `!` `@` `#` `$` `%` `^` `&` `*` `(` `)` | Pin to slot 1–10 |
+| `Shift`+`Number` | Pin to slot 1–10 |
 | `q` / `Esc` | Close |
 
 ## Config
 
 ```tmux
-# Change trigger key (default: M-e = Option/Alt+e)
+# Change hotkey (default: M-e aka option-e)
 set -g @quickdraw-key 'M-s'
 
 # Use with prefix instead of no-prefix
@@ -47,7 +48,3 @@ bind-key e run-shell -b "$HOME/.tmux/plugins/quickdraw/scripts/quickdraw.sh"
 Check for conflicts: `tmux list-keys | grep M-e`
 
 Session order persists in `~/.tmux/quickdraw-order`. Delete to reset.
-
-## License
-
-MIT
