@@ -1,9 +1,11 @@
 # quickdraw
 
-Harpoon-style tmux session switcher. 
+> Harpoon-style tmux session switcher. 
 Popup with session reorder, number hotkeys and i3 like slot assignment.
 
-**Requires:** tmux >= 3.2, bash >= 5
+<img width="293" height="255" alt="Screenshot 2026-04-02 at 09 50 10" src="https://github.com/user-attachments/assets/7c808ea3-31e2-4755-9fc4-0517da8837cb" />
+
+#### **Requires:** tmux >= 3.2, bash >= 5
 - macOS: `brew install bash` (system bash is 3.2)
 - Linux: system bash is usually 5+, no action needed
 
