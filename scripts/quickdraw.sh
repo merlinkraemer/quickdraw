@@ -41,6 +41,7 @@ get_ordered_sessions() {
 }
 
 save_order() {
+  mkdir -p "$(dirname "$ORDER_FILE")"
   printf '%s\n' "$@" > "$ORDER_FILE"
 }
 
