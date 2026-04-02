@@ -29,7 +29,7 @@ Default trigger: `Option/Alt+e` (no prefix required)
 
 | Key | Action |
 |-----|--------|
-| `↑` / `↓` | Move cursor |
+| `↑` / `↓` or `j` / `k` | Move cursor |
 | `Enter` | Switch to session |
 | `Number` | Jump to session N |
 | `Shift+↑/↓` or `Opt/Alt+↑/↓` | Reorder session |

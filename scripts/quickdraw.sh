@@ -229,6 +229,12 @@ inner() {
         fi
         exit 0
         ;;
+      j)
+        [ "$selected_idx" -lt $((${#sessions[@]} - 1)) ] && selected_idx=$((selected_idx + 1))
+        ;;
+      k)
+        [ "$selected_idx" -gt 0 ] && selected_idx=$((selected_idx - 1))
+        ;;
       q)
         exit 0
         ;;
