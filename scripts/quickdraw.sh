@@ -144,6 +144,59 @@ move_to_slot() {
   _sl_idx=$target_idx
 }
 
+open_in_terminal() {
+  local session_name=$1
+  local terminal
+  terminal=$(tmux show-option -gqv "@quickdraw-terminal" 2>/dev/null)
+
+  if [ -z "$terminal" ]; then
+    tmux display-message "quickdraw: set @quickdraw-terminal to your terminal"
+    return 1
+  fi
+
+  # POSIX-safe quoting: wrap in single quotes, escape embedded single quotes
+  local safe_name="'${session_name//\'/\'\\\'\'}'"
+  local attach="tmux attach-session -t $safe_name"
+
+  case "$terminal" in
+    ghostty)
+      if [[ "$OSTYPE" == darwin* ]]; then
+        tmux run-shell -b "open -na Ghostty.app --args --command='$attach'"
+      else
+        tmux run-shell -b "ghostty -e $attach"
+      fi
+      ;;
+    alacritty)
+      tmux run-shell -b "alacritty -e $attach"
+      ;;
+    wezterm)
+      tmux run-shell -b "wezterm start -- $attach"
+      ;;
+    kitty)
+      tmux run-shell -b "kitty $attach"
+      ;;
+    iterm2)
+      tmux run-shell -b "osascript -e 'tell application \"iTerm2\" to create window with default profile command \"$attach\"'"
+      ;;
+    terminal)
+      tmux run-shell -b "osascript -e 'tell application \"Terminal\" to do script \"$attach\"'"
+      ;;
+    xterm)
+      tmux run-shell -b "xterm -e $attach"
+      ;;
+    gnome-terminal)
+      tmux run-shell -b "gnome-terminal -- $attach"
+      ;;
+    konsole)
+      tmux run-shell -b "konsole -e $attach"
+      ;;
+    *)
+      tmux display-message "quickdraw: unsupported terminal '$terminal'"
+      return 1
+      ;;
+  esac
+}
+
 inner() {
   trap 'tput cnorm' EXIT
 
@@ -234,6 +287,11 @@ inner() {
         ;;
       k)
         [ "$selected_idx" -gt 0 ] && selected_idx=$((selected_idx - 1))
+        ;;
+      o)
+        if open_in_terminal "${sessions[$selected_idx]}"; then
+          exit 0
+        fi
         ;;
       q)
         exit 0

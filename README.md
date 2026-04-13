@@ -31,6 +31,7 @@ Default trigger: `Option/Alt+e` (no prefix required)
 |-----|--------|
 | `↑` / `↓` or `j` / `k` | Move cursor |
 | `Enter` | Switch to session |
+| `o` | Open session in new terminal window |
 | `Number` | Jump to session N |
 | `Shift+↑/↓` or `Opt/Alt+↑/↓` | Reorder session |
 | `Shift`+`Number` | Pin to slot 1–10 |
@@ -48,5 +49,29 @@ bind-key e run-shell -b "$HOME/.tmux/plugins/quickdraw/scripts/quickdraw.sh"
 ```
 
 Check for conflicts: `tmux list-keys | grep M-e`
+
+### Open in new terminal window
+
+Press `o` in the quickdraw popup to open the highlighted session in a new terminal window instead of switching to it in the current one.
+
+Set your terminal emulator so quickdraw knows how to open a new window:
+
+```tmux
+set -g @quickdraw-terminal 'ghostty'
+```
+
+Supported terminals:
+
+| Value | Terminal | Platform |
+|-------|----------|----------|
+| `ghostty` | [Ghostty](https://ghostty.org) | macOS / Linux |
+| `alacritty` | [Alacritty](https://alacritty.org) | macOS / Linux |
+| `wezterm` | [WezTerm](https://wezfurlong.org/wezterm) | macOS / Linux |
+| `kitty` | [Kitty](https://sw.kovidgoyal.net/kitty) | macOS / Linux |
+| `iterm2` | [iTerm2](https://iterm2.com) | macOS |
+| `terminal` | Terminal.app | macOS |
+| `gnome-terminal` | GNOME Terminal | Linux |
+| `konsole` | Konsole | Linux |
+| `xterm` | xterm | Linux |
 
 Session order persists in `~/.tmux/quickdraw-order`. Delete to reset.
