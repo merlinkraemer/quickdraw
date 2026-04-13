@@ -161,7 +161,23 @@ open_in_terminal() {
   case "$terminal" in
     ghostty)
       if [[ "$OSTYPE" == darwin* ]]; then
-        tmux run-shell -b "open -na Ghostty.app --args --command='$attach'"
+        if pgrep -x Ghostty >/dev/null; then
+          # Escape double quotes for AppleScript string
+          local as_cmd="tmux attach-session -t ${session_name//\"/\\\"}"
+          local tmpfile
+          tmpfile=$(mktemp /tmp/quickdraw-XXXXXX.applescript)
+          {
+            echo 'tell application "System Events" to tell process "Ghostty"'
+            echo '    click menu item "New Window" of menu "File" of menu bar 1'
+            echo '    delay 0.5'
+            echo "    keystroke \"$as_cmd\""
+            echo '    key code 36'
+            echo 'end tell'
+          } > "$tmpfile"
+          tmux run-shell -b "osascript '$tmpfile' ; rm -f '$tmpfile'"
+        else
+          tmux run-shell -b "open -a Ghostty.app --args --command='$attach'"
+        fi
       else
         tmux run-shell -b "ghostty -e $attach"
       fi
