@@ -34,7 +34,7 @@ session_inner() {
   [ -z "$candidates" ] && exit 0
 
   local selected
-  selected=$(echo "$candidates" | fzf \
+  selected=$(echo "$candidates" | sed 's/^/  /' | fzf \
     --layout=reverse \
     --prompt='' \
     --pointer='>' \
@@ -45,8 +45,12 @@ session_inner() {
     --border=none \
     --no-scrollbar \
     --no-separator \
+    --color='pointer:15' \
     --tiebreak=begin,length \
     2>/dev/null)
+
+  # Strip the padding prefix
+  selected=$(echo "$selected" | sed 's/^  //')
 
   [ $? -ne 0 ] && exit 0
   [ -z "$selected" ] && exit 0
