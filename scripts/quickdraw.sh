@@ -9,6 +9,8 @@ if [[ ! "$BASH_VERSION" =~ ^[5-9]\. ]]; then
 fi
 set -u
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 ORDER_FILE="$HOME/.tmux/quickdraw-order"
 
 get_ordered_sessions() {
@@ -310,6 +312,11 @@ inner() {
           selected_idx=$((${#sessions[@]} - 1))
         fi
         ;;
+      n)
+        # Close this popup, then open session launcher
+        tmux set-option -g @quickdraw-launch-session 1
+        exit 0
+        ;;
       o)
         if open_in_terminal "${sessions[$selected_idx]}"; then
           exit 0
@@ -352,5 +359,12 @@ popup_height=$((session_count + 4))
 [ "$popup_height" -lt 6  ] && popup_height=6
 [ "$popup_height" -gt 22 ] && popup_height=22
 
-{ tmux display-popup -E -w "$popup_width" -h "$popup_height" "$0 --inner"; } &>/dev/null &
+{ tmux display-popup -E -w "$popup_width" -h "$popup_height" "$0 --inner"; } &>/dev/null
+
+# Check if session launcher was requested (set by inner process on 'n' key)
+if [ "$(tmux show-option -gqv @quickdraw-launch-session 2>/dev/null)" = "1" ]; then
+  tmux set-option -gu @quickdraw-launch-session
+  "$SCRIPT_DIR/quickdraw-session.sh"
+fi
+
 exit 0
