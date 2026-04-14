@@ -161,15 +161,13 @@ open_in_terminal() {
   case "$terminal" in
     ghostty)
       if [[ "$OSTYPE" == darwin* ]]; then
-        # Open new window in existing Ghostty instance via Cmd+N, then run tmux command
-        local escaped="${session_name//\"/\\\"}"
-        local cmd="tmux attach-session -t $escaped"
-        tmux run-shell -b "osascript \
-          -e 'tell application \"Ghostty\" to activate' \
-          -e 'tell application \"System Events\" to tell process \"Ghostty\" to keystroke \"n\" using command down' \
-          -e 'delay 0.3' \
-          -e 'tell application \"System Events\" to tell process \"Ghostty\" to keystroke \"$cmd\"' \
-          -e 'tell application \"System Events\" to tell process \"Ghostty\" to key code 36'"
+        local dir
+        dir="$(tmux display-message -p '#{pane_current_path}')"
+        local escaped="${session_name//\\/\\\\}"
+        escaped="${escaped//\"/\\\"}"
+        local escaped_dir="${dir//\\/\\\\}"
+        escaped_dir="${escaped_dir//\"/\\\"}"
+        tmux run-shell -b "osascript -e 'tell application \"Ghostty\"' -e 'activate' -e 'set cfg to new surface configuration' -e 'set initial working directory of cfg to \"$escaped_dir\"' -e 'set command of cfg to \"tmux attach-session -t $escaped\"' -e 'set win to new window with configuration cfg' -e 'end tell'"
       else
         tmux run-shell -b "ghostty -e $attach"
       fi
