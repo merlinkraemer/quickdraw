@@ -45,7 +45,7 @@ session_inner() {
     --border=none \
     --no-scrollbar \
     --no-separator \
-    --color='pointer:15' \
+    --color='pointer:15,bg+:-1,fg+:-1,hl:-1,hl+:-1' \
     --tiebreak=begin,length \
     2>/dev/null)
 
