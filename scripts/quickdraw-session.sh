@@ -31,15 +31,31 @@ get_dir_cache() {
 
   # Regenerate cache if expired or missing
   if [ "$cache_age" -gt "$CACHE_TTL" ] || [ ! -f "$CACHE_FILE" ]; then
-    local dirs=""
+    local tmpfile
+    tmpfile=$(mktemp)
     for search_dir in $SEARCH_DIRS; do
       [ -d "$search_dir" ] || continue
-      dirs+="$(find "$search_dir" -mindepth 1 -maxdepth 5 -type d -not -path '*/\.*' 2>/dev/null)"$'\n'
-    done
-    echo "$dirs" | sed '/^$/d' > "$CACHE_FILE"
+      find "$search_dir" -mindepth 1 -maxdepth 3 -type d -not -path '*/\.*' 2>/dev/null
+    done | sed '/^$/d' | sed "s|^$HOME|~|" > "$tmpfile"
+    mv "$tmpfile" "$CACHE_FILE"
   fi
 
   cat "$CACHE_FILE"
+}
+
+# Truncate a ~/... path: show first 2 dirs + last dir
+truncate_path() {
+  local path=$1
+  local segments
+  IFS='/' read -ra segments <<< "$path"
+  local count=${#segments[@]}
+
+  if [ "$count" -le 4 ]; then
+    echo "$path"
+    return
+  fi
+
+  echo "${segments[0]}/${segments[1]}/${segments[2]}/.../${segments[-1]}"
 }
 
 session_inner() {
@@ -57,8 +73,15 @@ session_inner() {
 
   [ -z "$candidates" ] && exit 0
 
+  # Add numbers to first 9 items
+  local numbered_candidates
+  numbered_candidates=$(echo "$candidates" | awk '{
+    if (NR <= 9) printf "%d: %s\n", NR, $0
+    else print
+  }')
+
   local selected
-  selected=$(echo "$candidates" | sed 's/^/  /' | fzf \
+  selected=$(echo "$numbered_candidates" | sed 's/^/  /' | fzf \
     --layout=reverse \
     --prompt='' \
     --pointer='>' \
@@ -69,19 +92,27 @@ session_inner() {
     --border=none \
     --no-scrollbar \
     --no-separator \
-    --color='pointer:15,bg+:-1,fg+:-1,hl:-1,hl+:-1' \
+    --color='current-fg:#ebdbb2,current-bg:#282828,pointer:15,gutter:#282828' \
     --tiebreak=begin,length \
+    --bind '1:pos(0)+accept' \
+    --bind '2:pos(1)+accept' \
+    --bind '3:pos(2)+accept' \
+    --bind '4:pos(3)+accept' \
+    --bind '5:pos(4)+accept' \
+    --bind '6:pos(5)+accept' \
+    --bind '7:pos(6)+accept' \
+    --bind '8:pos(7)+accept' \
+    --bind '9:pos(8)+accept' \
     2>/dev/null)
 
-  # Strip the padding prefix
-  selected=$(echo "$selected" | sed 's/^  //')
+  # Strip padding and number prefix
+  selected=$(echo "$selected" | sed 's/^  //' | sed 's/^[1-9]: //')
 
   [ $? -ne 0 ] && exit 0
   [ -z "$selected" ] && exit 0
 
   # Resolve: session? directory? new name?
   if tmux has-session -t="$selected" 2>/dev/null; then
-    # It's an existing session — switch to it
     tmux switch-client -t "$selected"
     exit 0
   fi
@@ -90,13 +121,16 @@ session_inner() {
   local selected_name
   selected_name=$(basename "$selected" | tr . _)
 
+  # Expand ~ to $HOME for tmux
+  local selected_path="${selected/#\~/$HOME}"
+
   if tmux has-session -t="$selected_name" 2>/dev/null; then
     tmux switch-client -t "$selected_name"
     exit 0
   fi
 
   # Create new session and switch to it
-  tmux new-session -ds "$selected_name" -c "$selected"
+  tmux new-session -ds "$selected_name" -c "$selected_path"
   tmux switch-client -t "$selected_name"
   exit 0
 }
