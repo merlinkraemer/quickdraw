@@ -150,7 +150,7 @@ open_in_terminal() {
   terminal=$(tmux show-option -gqv "@quickdraw-terminal" 2>/dev/null)
 
   if [ -z "$terminal" ]; then
-    tmux display-message "quickdraw: set @quickdraw-terminal to your terminal"
+    tmux display-message "quickdraw: set @quickdraw-terminal (ghostty|alacritty|wezterm|kitty|iterm2|terminal|xterm|gnome-terminal|konsole)"
     return 1
   fi
 
@@ -161,35 +161,31 @@ open_in_terminal() {
   case "$terminal" in
     ghostty)
       if [[ "$OSTYPE" == darwin* ]]; then
-        if pgrep -x Ghostty >/dev/null; then
-          # Escape double quotes for AppleScript string
-          local as_cmd="tmux attach-session -t ${session_name//\"/\\\"}"
-          local tmpfile
-          tmpfile=$(mktemp /tmp/quickdraw-XXXXXX.applescript)
-          {
-            echo 'tell application "System Events" to tell process "Ghostty"'
-            echo '    click menu item "New Window" of menu "File" of menu bar 1'
-            echo '    delay 0.5'
-            echo "    keystroke \"$as_cmd\""
-            echo '    key code 36'
-            echo 'end tell'
-          } > "$tmpfile"
-          tmux run-shell -b "osascript '$tmpfile' ; rm -f '$tmpfile'"
-        else
-          tmux run-shell -b "open -a Ghostty.app --args --command='$attach'"
-        fi
+        tmux run-shell -b "open -na Ghostty.app --args -e $attach"
       else
         tmux run-shell -b "ghostty -e $attach"
       fi
       ;;
     alacritty)
-      tmux run-shell -b "alacritty -e $attach"
+      if [[ "$OSTYPE" == darwin* ]]; then
+        tmux run-shell -b "open -na Alacritty.app --args -e $attach"
+      else
+        tmux run-shell -b "alacritty -e $attach"
+      fi
       ;;
     wezterm)
-      tmux run-shell -b "wezterm start -- $attach"
+      if [[ "$OSTYPE" == darwin* ]]; then
+        tmux run-shell -b "open -na WezTerm.app --args start -- $attach"
+      else
+        tmux run-shell -b "wezterm start -- $attach"
+      fi
       ;;
     kitty)
-      tmux run-shell -b "kitty $attach"
+      if [[ "$OSTYPE" == darwin* ]]; then
+        tmux run-shell -b "open -na Kitty.app --args $attach"
+      else
+        tmux run-shell -b "kitty $attach"
+      fi
       ;;
     iterm2)
       tmux run-shell -b "osascript -e 'tell application \"iTerm2\" to create window with default profile command \"$attach\"'"
