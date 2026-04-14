@@ -161,31 +161,27 @@ open_in_terminal() {
   case "$terminal" in
     ghostty)
       if [[ "$OSTYPE" == darwin* ]]; then
-        tmux run-shell -b "open -na Ghostty.app --args -e $attach"
+        # Open new window in existing Ghostty instance via Cmd+N, then run tmux command
+        local escaped="${session_name//\"/\\\"}"
+        local cmd="tmux attach-session -t $escaped"
+        tmux run-shell -b "osascript \
+          -e 'tell application \"Ghostty\" to activate' \
+          -e 'tell application \"System Events\" to tell process \"Ghostty\" to keystroke \"n\" using command down' \
+          -e 'delay 0.3' \
+          -e 'tell application \"System Events\" to tell process \"Ghostty\" to keystroke \"$cmd\"' \
+          -e 'tell application \"System Events\" to tell process \"Ghostty\" to key code 36'"
       else
         tmux run-shell -b "ghostty -e $attach"
       fi
       ;;
     alacritty)
-      if [[ "$OSTYPE" == darwin* ]]; then
-        tmux run-shell -b "open -na Alacritty.app --args -e $attach"
-      else
-        tmux run-shell -b "alacritty -e $attach"
-      fi
+      tmux run-shell -b "alacritty -e $attach"
       ;;
     wezterm)
-      if [[ "$OSTYPE" == darwin* ]]; then
-        tmux run-shell -b "open -na WezTerm.app --args start -- $attach"
-      else
-        tmux run-shell -b "wezterm start -- $attach"
-      fi
+      tmux run-shell -b "wezterm start -- $attach"
       ;;
     kitty)
-      if [[ "$OSTYPE" == darwin* ]]; then
-        tmux run-shell -b "open -na Kitty.app --args $attach"
-      else
-        tmux run-shell -b "kitty $attach"
-      fi
+      tmux run-shell -b "kitty $attach"
       ;;
     iterm2)
       tmux run-shell -b "osascript -e 'tell application \"iTerm2\" to create window with default profile command \"$attach\"'"
