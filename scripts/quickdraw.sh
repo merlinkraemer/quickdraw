@@ -265,9 +265,17 @@ inner() {
             ";2B") move_session sessions selected_idx "down" "$current_session" ;;
           esac
         elif [ "$key3" = "A" ]; then
-          [ "$selected_idx" -gt 0 ] && selected_idx=$((selected_idx - 1))
+          if [ "$selected_idx" -gt 0 ]; then
+            selected_idx=$((selected_idx - 1))
+          else
+            selected_idx=$((${#sessions[@]} - 1))
+          fi
         elif [ "$key3" = "B" ]; then
-          [ "$selected_idx" -lt $((${#sessions[@]} - 1)) ] && selected_idx=$((selected_idx + 1))
+          if [ "$selected_idx" -lt $((${#sessions[@]} - 1)) ]; then
+            selected_idx=$((selected_idx + 1))
+          else
+            selected_idx=0
+          fi
         fi
         continue
 
@@ -289,10 +297,18 @@ inner() {
         exit 0
         ;;
       j)
-        [ "$selected_idx" -lt $((${#sessions[@]} - 1)) ] && selected_idx=$((selected_idx + 1))
+        if [ "$selected_idx" -lt $((${#sessions[@]} - 1)) ]; then
+          selected_idx=$((selected_idx + 1))
+        else
+          selected_idx=0
+        fi
         ;;
       k)
-        [ "$selected_idx" -gt 0 ] && selected_idx=$((selected_idx - 1))
+        if [ "$selected_idx" -gt 0 ]; then
+          selected_idx=$((selected_idx - 1))
+        else
+          selected_idx=$((${#sessions[@]} - 1))
+        fi
         ;;
       o)
         if open_in_terminal "${sessions[$selected_idx]}"; then
