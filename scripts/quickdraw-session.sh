@@ -15,17 +15,41 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SEARCH_DIRS=$(tmux show-option -gqv "@quickdraw-session-dirs" 2>/dev/null)
 [ -z "$SEARCH_DIRS" ] && SEARCH_DIRS="$HOME/dev"
 
+CACHE_FILE="/tmp/quickdraw-dir-cache"
+CACHE_TTL=300  # 5 minutes
+
+get_dir_cache() {
+  local now
+  now=$(date +%s)
+  local cache_age=0
+
+  if [ -f "$CACHE_FILE" ]; then
+    local cache_mtime
+    cache_mtime=$(stat -f %m "$CACHE_FILE" 2>/dev/null || stat -c %Y "$CACHE_FILE" 2>/dev/null)
+    cache_age=$((now - cache_mtime))
+  fi
+
+  # Regenerate cache if expired or missing
+  if [ "$cache_age" -gt "$CACHE_TTL" ] || [ ! -f "$CACHE_FILE" ]; then
+    local dirs=""
+    for search_dir in $SEARCH_DIRS; do
+      [ -d "$search_dir" ] || continue
+      dirs+="$(find "$search_dir" -mindepth 1 -maxdepth 5 -type d -not -path '*/\.*' 2>/dev/null)"$'\n'
+    done
+    echo "$dirs" | sed '/^$/d' > "$CACHE_FILE"
+  fi
+
+  cat "$CACHE_FILE"
+}
+
 session_inner() {
   # 1. Existing sessions (shown first)
   local sessions
   sessions=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
 
-  # 2. Directories from search paths
-  local dirs=""
-  for search_dir in $SEARCH_DIRS; do
-    [ -d "$search_dir" ] || continue
-    dirs+="$(find "$search_dir" -mindepth 1 -maxdepth 5 -type d -not -path '*/\.*' 2>/dev/null)"$'\n'
-  done
+  # 2. Directories from cache
+  local dirs
+  dirs=$(get_dir_cache)
 
   # Combined: sessions first, then directories
   local candidates
