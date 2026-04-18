@@ -303,12 +303,18 @@ inner() {
           selected_idx=0
         fi
         ;;
+      J)
+        move_session sessions selected_idx "down" "$current_session"
+        ;;
       k)
         if [ "$selected_idx" -gt 0 ]; then
           selected_idx=$((selected_idx - 1))
         else
           selected_idx=$((${#sessions[@]} - 1))
         fi
+        ;;
+      K)
+        move_session sessions selected_idx "up" "$current_session"
         ;;
       o)
         if open_in_terminal "${sessions[$selected_idx]}"; then
