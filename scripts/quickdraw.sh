@@ -76,20 +76,12 @@ show_list() {
 
 # Move the current session up/down in the list.
 # Uses namerefs (bash 5+) to modify the caller's sessions array and selected_idx in-place.
-# Usage: move_session sessions_ref new_idx_ref direction current_session_name
+# Usage: move_session sessions_ref new_idx_ref direction selected_idx
 move_session() {
   declare -n _mv_sessions=$1
   declare -n _mv_idx=$2
   local direction=$3
-  local current=$4
-
-  local current_idx=-1
-  for i in "${!_mv_sessions[@]}"; do
-    if [ "${_mv_sessions[$i]}" = "$current" ]; then
-      current_idx=$i; break
-    fi
-  done
-  [ "$current_idx" -eq -1 ] && return 1
+  local current_idx=$4
 
   local target_idx=$current_idx
   if   [ "$direction" = "up"   ] && [ "$current_idx" -gt 0 ]; then
@@ -244,13 +236,13 @@ inner() {
           if [ "$key4" = "1" ]; then
             read -rsn3 -t 0.01 key5
             case "$key5" in
-              ";2A") move_session sessions selected_idx "up"   "$current_session" ;;
-              ";2B") move_session sessions selected_idx "down" "$current_session" ;;
+              ";2A") move_session sessions selected_idx "up"   "$selected_idx" ;;
+              ";2B") move_session sessions selected_idx "down" "$selected_idx" ;;
             esac
           elif [ "$key4" = "A" ]; then
-            move_session sessions selected_idx "up"   "$current_session"
+            move_session sessions selected_idx "up"   "$selected_idx"
           elif [ "$key4" = "B" ]; then
-            move_session sessions selected_idx "down" "$current_session"
+            move_session sessions selected_idx "down" "$selected_idx"
           fi
         fi
         continue
@@ -261,8 +253,8 @@ inner() {
         if [ "$key3" = "1" ]; then
           read -rsn3 -t 0.01 key4
           case "$key4" in
-            ";2A") move_session sessions selected_idx "up"   "$current_session" ;;
-            ";2B") move_session sessions selected_idx "down" "$current_session" ;;
+            ";2A") move_session sessions selected_idx "up"   "$selected_idx" ;;
+            ";2B") move_session sessions selected_idx "down" "$selected_idx" ;;
           esac
         elif [ "$key3" = "A" ]; then
           if [ "$selected_idx" -gt 0 ]; then
@@ -304,7 +296,7 @@ inner() {
         fi
         ;;
       J)
-        move_session sessions selected_idx "down" "$current_session"
+        move_session sessions selected_idx "down" "$selected_idx"
         ;;
       k)
         if [ "$selected_idx" -gt 0 ]; then
@@ -314,7 +306,7 @@ inner() {
         fi
         ;;
       K)
-        move_session sessions selected_idx "up" "$current_session"
+        move_session sessions selected_idx "up" "$selected_idx"
         ;;
       o)
         if open_in_terminal "${sessions[$selected_idx]}"; then
