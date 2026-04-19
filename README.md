@@ -29,10 +29,11 @@ Default trigger: `Option/Alt+e` (no prefix required)
 
 | Key | Action |
 |-----|--------|
+| `Option/Alt`+`e` | Open quickdraw |
 | `↑` / `↓` or `j` / `k` | Move cursor |
 | `Enter` | Switch to session |
 | `o` | Open session in new terminal window |
-| `Number` | Jump to session N |
+| `1`–`9` | Quick-switch to session N |
 | `Shift+↑/↓` or `Shift+J/K` or `Opt/Alt+↑/↓` | Reorder session |
 | `Shift`+`Number` | Pin to slot 1–10 |
 | `q` / `Esc` | Close |
