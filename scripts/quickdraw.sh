@@ -115,18 +115,18 @@ move_to_slot() {
   declare -n _sl_sessions=$1
   declare -n _sl_idx=$2
   local target_slot=$3
-  local selected_idx=$4
+  local _selected_idx=$4
 
   local max_idx=$((${#_sl_sessions[@]} - 1))
   local target_idx=$((target_slot - 1))
   [ "$target_idx" -lt 0 ]        && target_idx=0
   [ "$target_idx" -gt "$max_idx" ] && target_idx=$max_idx
-  [ "$target_idx" -eq "$selected_idx" ] && return 1
+  [ "$target_idx" -eq "$_selected_idx" ] && return 1
 
-  local session_to_move="${_sl_sessions[$selected_idx]}"
+  local session_to_move="${_sl_sessions[$_selected_idx]}"
   local tmp=()
   for i in "${!_sl_sessions[@]}"; do
-    [ "$i" -ne "$selected_idx" ] && tmp+=("${_sl_sessions[$i]}")
+    [ "$i" -ne "$_selected_idx" ] && tmp+=("${_sl_sessions[$i]}")
   done
 
   local result=()
