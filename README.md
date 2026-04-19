@@ -33,7 +33,7 @@ Default trigger: `Option/Alt+e` (no prefix required)
 | `Enter` | Switch to session |
 | `o` | Open session in new terminal window |
 | `Number` | Jump to session N |
-| `Shift+↑/↓` or `Opt/Alt+↑/↓` | Reorder session |
+| `Shift+↑/↓` or `Shift+J/K` or `Opt/Alt+↑/↓` | Reorder session |
 | `Shift`+`Number` | Pin to slot 1–10 |
 | `q` / `Esc` | Close |
 
